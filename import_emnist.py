@@ -4,6 +4,7 @@ import requests
 import zipfile
 import io
 import gzip
+import matplotlib.pyplot as plt
 
 def download_and_extract_emnist():
     url = "https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip"
@@ -23,7 +24,7 @@ def get_images_and_labels(subset_name:str,type:str):
     #https://www.youtube.com/watch?v=TswQj9bgbSg
     with gzip.open(images_path,'rb') as f:
         images = np.frombuffer(f.read(),np.uint8,offset=16)
-        images = images.reshape(-1,28,28)
+        images = images.reshape(-1,28,28).transpose(0, 2, 1)
     with gzip.open(labels_path,'rb') as g:
         labels = np.frombuffer(g.read(),np.uint8,offset=8)
     return images, labels
@@ -44,3 +45,9 @@ class ExtractTestSamples:
     
     def __iter__(self):
         return iter((self.images, self.labels))
+
+class ShowImage:
+    def __init__(self,image_matrix):
+        image = np.asarray(image_matrix).squeeze()
+        plt.imshow(image)
+        plt.show()
