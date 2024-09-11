@@ -29,6 +29,7 @@ def get_images_and_labels(subset_name:str,type:str):
     #https://www.youtube.com/watch?v=TswQj9bgbSg
     with gzip.open(images_path,'rb') as f:
         images = np.frombuffer(f.read(),np.uint8,offset=16)
+        #For the correct display of the images, it is necessary to use the function to transpose the matrices.
         images = images.reshape(-1,28,28).transpose(0, 2, 1)
     with gzip.open(labels_path,'rb') as g:
         labels = np.frombuffer(g.read(),np.uint8,offset=8)
