@@ -7,6 +7,11 @@ import gzip
 import matplotlib.pyplot as plt
 
 def download_and_extract_emnist():
+    #See this citation for more information about the EMNIST database:
+    # Cohen, G., Afshar, S., Tapson, J., & van Schaik, A. (2017). 
+    # EMNIST: an extension of MNIST to handwritten letters. 
+    # Retrieved from http://arxiv.org/abs/1702.05373
+
     url = "https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip"
     if not os.path.isdir(os.path.join(os.getcwd(), "gzip")):
         response = requests.get(url)
@@ -32,6 +37,11 @@ def get_images_and_labels(subset_name:str,type:str):
 
 class ExtractTrainSamples:
     def __init__(self, subset_name:str):
+        """
+        Parameters:
+        subset_name (str): This variable can take the values: “balanced”, “byclass”, “bymerge”, “digits”, “letters”, “mnist”.
+            In this paper it is clearer how the distribution of each class is: https://arxiv.org/abs/1702.05373v1
+        """
         download_and_extract_emnist()
         self.images, self.labels = get_images_and_labels(subset_name,"train")
     
@@ -40,6 +50,11 @@ class ExtractTrainSamples:
 
 class ExtractTestSamples:
     def __init__(self, subset_name:str):
+        """
+        Parameters:
+        subset_name (str): This variable can take the values: “balanced”, “byclass”, “bymerge”, “digits”, “letters”, “mnist”.
+            In this paper it is clearer how the distribution of each class is: https://arxiv.org/abs/1702.05373v1
+        """
         download_and_extract_emnist()
         self.images, self.labels = get_images_and_labels(subset_name,"test")
     
