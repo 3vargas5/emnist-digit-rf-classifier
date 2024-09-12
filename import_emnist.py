@@ -37,10 +37,14 @@ def get_images_and_labels(subset_name:str,type:str):
 
 
 class ExtractTrainSamples:
+    """
+    Example:
+        >>> images, labels = ExtractTrainSamples("digits")
+    """
     def __init__(self, subset_name:str):
         """
         Parameters:
-        subset_name (str): This variable can take the values: “balanced”, “byclass”, “bymerge”, “digits”, “letters”, “mnist”.
+            subset_name (str): This variable can take the values: “balanced”, “byclass”, “bymerge”, “digits”, “letters”, “mnist”.
             In this paper it is clearer how the distribution of each class is: https://arxiv.org/abs/1702.05373v1
         """
         download_and_extract_emnist()
@@ -50,6 +54,10 @@ class ExtractTrainSamples:
         return iter((self.images, self.labels))
 
 class ExtractTestSamples:
+    """
+    Example:
+        >>> images, labels = ExtractTestSamples("digits")
+    """
     def __init__(self, subset_name:str):
         """
         Parameters:
@@ -65,5 +73,5 @@ class ExtractTestSamples:
 class ShowImage:
     def __init__(self,image_matrix):
         image = np.asarray(image_matrix).squeeze()
-        plt.imshow(image)
+        plt.imshow(image, cmap="gray_r")
         plt.show()
