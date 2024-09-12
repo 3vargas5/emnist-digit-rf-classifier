@@ -18,3 +18,4 @@ class ShowCircles:
         plt.imshow(image, cmap="gray_r")
         plt.plot(x, y, 'ro', markersize=5)
         plt.show()
+        print(2+2)
