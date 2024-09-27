@@ -99,7 +99,6 @@ class ShowCircles:
         # Draw Lines
         self.draw_dividing_lines(x, y, radius)
         self.add_labels(x, y, np.ceil(radius/2), radius)
-        plt.plot(6,14,"bo")
         plt.axis('equal')
         plt.show()
     
