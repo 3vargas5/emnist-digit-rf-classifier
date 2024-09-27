@@ -2,26 +2,50 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 
-def get_center(image_matrix):
-    rows, cols = image_matrix.shape
+def get_center(image_matrix,image_shape):
+    rows, cols = image_shape
     image_area = image_matrix.sum()
     x_center = round(np.sum(np.arange(rows)[:, np.newaxis] * image_matrix) / image_area)
     y_center = round(np.sum(np.arange(cols) * image_matrix) / image_area)
     return (y_center,x_center)
 
-def max_distance_from_center(center,image_matrix, threshold = 10) -> int:
-    rows, cols = image_matrix.shape
+def max_distance_from_center(center,image_matrix, image_shape, threshold = 10) -> int:
+    rows, cols = image_shape
     y, x = np.indices((rows, cols))
     distances_sq = (x - center[0])**2+(y - center[1])**2
     mask = image_matrix > threshold
     return np.ceil(np.sqrt(np.max(distances_sq[mask])))
 
+
+
 class ObjectCircleDivider:
     def __new__(cls, image_matrix):
-        x, y = get_center(image_matrix)
-        radius = max_distance_from_center((x, y), image_matrix)
-        dictionary = cls.weighted_average_points_by_section((x, y), np.ceil(radius / 2), radius, image_matrix)
-        return dictionary
+        image_matrix, radius = cls.resize_image(image_matrix)
+        matrix_size = int(image_matrix.shape[0] // 2)
+        center = matrix_size,matrix_size
+        return cls.weighted_average_points_by_section(center, np.ceil(radius/2), radius, image_matrix, threshold=0)
+
+
+
+    @staticmethod
+    def resize_image(image_matrix):
+        rows, cols = image_matrix.shape
+        centroid_x, centroid_y = get_center(image_matrix, (rows, cols))
+        radius = max_distance_from_center((centroid_x, centroid_y), image_matrix, (rows, cols))
+        
+        # Distance from center to the margin
+        top_margin = centroid_y
+        right_margin = (cols-1)-centroid_y
+        bottom_margin = (rows-1)-centroid_x
+        left_margin = centroid_x
+
+        new_size = int(2*max(top_margin,right_margin,bottom_margin,left_margin,radius)+1)
+        start_row = int(new_size //2 - centroid_y)
+        start_col = int(new_size //2 - centroid_x)
+        new_matrix = np.zeros((new_size, new_size), dtype=image_matrix.dtype)
+        new_matrix[start_row:start_row+rows, start_col:start_col+cols] = image_matrix
+        return new_matrix, radius
+        
     
     @staticmethod
     def find_section_point(i, j, center, radius_inner, radius_outer):
@@ -58,9 +82,8 @@ class ObjectCircleDivider:
         return circle_position, angle_position
     
     @staticmethod
-    def weighted_average_points_by_section(center, radius_inner, radius_outer, image_matrix, threshold=0):
-        x = center[0]
-        y = center[1]
+    def weighted_average_points_by_section(center, radius_inner, radius_outer, image_matrix, threshold=0) -> dict:
+        x,y = center
         point_divisions = {}
         count_points_sections = {}
         for i, j in np.ndindex(image_matrix.shape):
@@ -74,17 +97,17 @@ class ObjectCircleDivider:
                 point_divisions[key] += image_matrix[i, j]
             if key not in count_points_sections:
                 count_points_sections[key] = 0
-            else:
-                count_points_sections[key] += 1
+            count_points_sections[key] += 1
         sorted_keys = sorted(point_divisions.keys(), key=lambda k: (int(k[2]), int(k[3])))
-        result = {key: round(point_divisions[key] / (count_points_sections[key] * 255), 6) for key in sorted_keys}
+        result = {key: np.round(point_divisions[key] / (count_points_sections[key] * 255), 6) for key in sorted_keys}
         return result
 
     
 class ShowCircles:
     def __init__(self, image_matrix):
-        x, y = get_center(image_matrix)
-        radius = np.ceil(max_distance_from_center((x,y), image_matrix))
+        image_shape = image_matrix.shape
+        x, y = get_center(image_matrix,image_shape)
+        radius = max_distance_from_center((x, y), image_matrix, image_shape)
         image = np.asarray(image_matrix).squeeze()
         plt.figure(figsize=(6, 6))
         plt.imshow(image, cmap="gray_r")
